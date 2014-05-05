@@ -1,118 +1,81 @@
-FROM ubuntu:14.04
- 
-RUN echo 'deb http://archive.ubuntu.com/ubuntu trusty main universe' > /etc/apt/sources.list && \
-    echo 'deb http://archive.ubuntu.com/ubuntu trusty-updates universe' >> /etc/apt/sources.list 
-#   echo 'deb http://archive.ubuntu.com/ubuntu trusty-security universe' >> /etc/apt/sources.list && \
-#   echo 'deb http://llvm.org/apt/trusty/ llvm-toolchain-trusty main' >> /etc/apt/sources.list && \
-#   echo 'deb http://llvm.org/apt/trusty/ llvm-toolchain-trusty' main >> /etc/apt/sources.list
+FROM base/arch
 
-#Prevent daemon start during install
-RUN dpkg-divert --local --rename --add /sbin/initctl && ln -s /bin/true /sbin/initctl -f
-RUN apt-get update
+MAINTAINER Dominique Maniry dmaniry@cs.tu-berlin.de
 
-#Supervisord
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y supervisor && mkdir -p /var/log/supervisor
+#RUN echo "Server = http://mirror.rit.edu/archlinux/$repo/os/$arch" > /etc/pacman.d/mirrorlist
 
-#SSHD
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y openssh-server &&	mkdir /var/run/sshd && \
-	echo 'root:root' |chpasswd
+RUN pacman -Syyu --noconfirm
 
-#Utilities
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y vim less net-tools inetutils-ping curl git telnet nmap socat dnsutils netcat
-
-#Required by Python packages
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential python-dev python-pip liblapack-dev libatlas-dev gfortran libfreetype6 libfreetype6-dev libpng12-dev python-lxml libyaml-dev g++ libffi-dev pkg-config
-
-#0MQ
-RUN cd /tmp && \
-    wget http://download.zeromq.org/zeromq-4.0.3.tar.gz && \
-    tar xvfz zeromq-4.0.3.tar.gz && \
-    cd zeromq-4.0.3 && \
-    ./configure && \
-    make install && \
-    ldconfig
+#Pacman packages
+RUN pacman -Sy --noconfirm \
+      openssh supervisor base-devel vim curl git htop nmap dnsutils zeromq zsh jshon \
+      grml-zsh-config python2 ipython2 python2-pip python2-setuptools python2-numpy \
+      python2-scipy python2-yaml python2-requests python2-biopython python2-jinja \
+      python2-scikit-learn python2-numexpr python2-pytables python2-pyzmq \
+      cython2 python2-tornado python2-pygments python2-sympy python2-nltk python2-networkx \
+      python2-matplotlib opencv eigen2 r && pacman -Scc --noconfirm
 
 RUN export PIP_DEFAULT_TIMEOUT=600
-#Upgrade pip
-RUN pip install -U setuptools
-RUN pip install -U pip
 #matplotlib needs latest distribute
-RUN pip install -U distribute
-#IPython
-RUN pip install ipython
+#RUN pip2 install -U distribute
 
-#NumPy is required for Numba
-RUN pip install numpy
 #Pandas
-RUN pip install pandas
-#Optional
-RUN ln -s /usr/local/opt/freetype/include/freetype2 /usr/local/include/freetype
-RUN pip install cython
-RUN pip install jinja2 pyzmq tornado
-RUN pip install numexpr bottleneck scipy pygments 
-RUN pip install matplotlib sympy pymc
-RUN pip install patsy
-RUN pip install statsmodels
-RUN pip install beautifulsoup4 html5lib
-#Pattern
-RUN pip install --allow-external pattern pattern
-#NLTK
-RUN pip install pyyaml nltk
-#Networkx
-RUN pip install networkx
-#LLVM and Numba
-#RUN apt-get install -y llvm-3.3
-RUN cd /tmp && \
-    wget http://llvm.org/releases/3.2/llvm-3.2.src.tar.gz && \
-    tar zxvf llvm-3.2.src.tar.gz && \
-    cd llvm-3.2.src && \
-    ./configure --enable-optimized && \
-    REQUIRES_RTTI=1 make install 
-#RUN pip install versioneer
-#RUN versioneer-installer 
-RUN pip install llvmpy==0.11.2 && \
-    pip install llvmmath && \
-    pip install numba
-#Biopython
-RUN pip install biopython
+RUN pip2 install pandas
 #Bokeh
-#RUN pip install requests bokeh
+RUN pip2 install bokeh
 
-#Install R 3+
-RUN echo 'deb http://cran.rstudio.com/bin/linux/ubuntu trusty/' > /etc/apt/sources.list.d/r.list
-RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
-RUN apt-get update
-RUN apt-get install -y r-base
+# Parakeet (numba alternative)
+RUN pip2 install dsltools
+RUN pip2 install parakeet
+
 #Rmagic
-RUN pip install rpy2
+RUN pip2 install rpy2
 
-#Vincent
-RUN pip install vincent
-
-#Scikit-learn
-RUN pip install -U scikit-learn
+#Optional
+#RUN pip2 install bottleneck 
+#RUN pip2 install pymc
+#RUN pip2 install patsy
+#RUN pip2 install statsmodels
+#RUN pip2 install beautifulsoup4 html5lib
+#RUN pip2 install pattern
+#RUN pip2 install vincent
 
 #Cleanup
 RUN rm -rf /tmp/*
 
 #user ipy
-RUN useradd -D --shell=/bin/bash
-RUN useradd -m ipy
-RUN echo "ipy:ipython" | chpasswd
-RUN adduser ipy sudo
-RUN sudo -u ipy mkdir -p /home/ipy/bin /home/ipy/.matplotlib /home/ipy/.ipython /home/ipy/ipynotebooks /home/ipy/.ssh
+RUN useradd -D --shell=/bin/zsh
+RUN useradd -m -G wheel ipy
+
+ADD id_rsa.pub /root/.ssh/authorized_keys
+RUN chown root:root /root/.ssh/authorized_keys
+ADD id_rsa.pub /home/ipy/.ssh/authorized_keys
+RUN chown ipy:ipy /home/ipy/.ssh/authorized_keys
 
 ENV IPYTHONDIR /home/ipy/.ipython
 ENV IPYTHON_PROFILE nbserver
-RUN /usr/local/bin/ipython profile create nbserver
+RUN ipython2 profile create nbserver
 
 # Adding script necessary to start ipython notebook server.
 #ADD ./notebooks /home/ipy/ipynotebooks
 ADD ./profile_nbserver /home/ipy/.ipython/profile_nbserver
-RUN chown ipy:ipy /home/ipy -R && chmod 755  /var/run/sshd/
+RUN chown ipy:ipy /home/ipy -R
+RUN echo "%wheel ALL=(ALL) ALL" > /etc/sudoers
+RUN visudo -s -c -f /etc/sudoers
+RUN chsh -s /bin/zsh
 
-ADD ./conf /etc/supervisor/conf.d
+# generate host keys
+RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key
+RUN echo "HostKey /etc/ssh/ssh_host_rsa_key" >> /etc/ssh/sshd_config
+RUN sed -ri 's/UsePAM yes/#UsePAM yes/g' /etc/ssh/sshd_config
+RUN echo "UsePAM no" >> /etc/ssh/sshd_config
+# make zsh work in urxvt
+RUN echo "TERM=xterm" >> /root/.zshrc
+RUN echo "TERM=xterm" >> /home/ipy/.zshrc
 
-EXPOSE 22 8888 9001
+
+ADD ./conf /etc/supervisor.d/
+
+EXPOSE 22 8888
 
 CMD ["/usr/bin/supervisord"]
