@@ -12,7 +12,7 @@ Python libs are installed using pacman if possible and pip if not (no aur packag
 * [SciPy](http://scipy.org) 
 * [SymPy](http://sympy.org)
 * [Cython](http://cython.org)
-* [Prakeet](http://www.parakeetpython.com/)
+* [Parakeet](http://www.parakeetpython.com/)
 * [Biopython](http://biopython.org)
 * [Rmagic](http://ipython.org/ipython-doc/dev/config/extensions/rmagic.html)
 * [Scikit-learn](http://scikit-learn.org/stable/)
@@ -20,18 +20,20 @@ Python libs are installed using pacman if possible and pip if not (no aur packag
 * see Dockerfile for more
 
 ####Instructions
-1. Build Docker image using the using ```build``` script.  This can take a long time, ~30mins.  Luckily this step only has to done once(or whenever you change the Dockerfile). you have to copy your public key to  id_rsa.pub if you want to use ssh.
-2. Create and shell into new Docker container using ```shell``` script
-3. Start IPython Notebook in the container using ```supervisord&```
-4. Point your brower to ```http://<your host name>:8888```, default login password is 'password'
+1. Add a SSL certificate using ```openssl req -x509 -nodes -days 365 -newkey rsa:1024 -keyout mycert.pem -out mycert.pem``` or use a proper one if you can.
+2. Add your public key as id_rsa.pub (or ```touch id_rsa.pub``` if you don't want to use ssh)
+2. Build Docker image using the using ```build``` script.  This can take a long time, ~30mins.  Luckily this step only has to done once(or whenever you change the Dockerfile).
+3. Create and shell into new Docker container using ```shell``` script
+4. Start IPython Notebook in the container using ```supervisord&```
+5. Point your brower to ```http://<your host name>:8888```, default login password is 'password'
 
-To run in background execute ```./start [notebook_path] [host]``` and notebook_path will be mounted as the notebook folder of ipython and the ports 8888 and 23 will be published on host (default 0.0.0.0)
+To run in background execute ```./start [notebook_path] [ip]``` and notebook_path will be mounted as the notebook folder of ipython and the ports 8888 and 23 will be published on ip (default 0.0.0.0, use 127.0.0.1 for local testing)
 
 #### Background mode
 In background or using supervisord the user ipy is used to run the ipython notebook. The /home/ipy/.python contains the configuration options that were copied from the profile_nbserver.
 
-#### Removing or changing password authentication
-In order to remove password authentication, modify the configuration in this [file](http://github.com/lluiscanet/docker-ipython/blob/master/profile_nbserver/ipython_notebook_config.py)
+#### Enable or change password authentication
+In order to enable password authentication, modify the configuration in this [file](http://github.com/lluiscanet/docker-ipython/blob/master/profile_nbserver/ipython_notebook_config.py)
 by commenting out the line
 ```c.NotebookApp.password = u'sha1:01dc1e3ecfb8:cc539c4fcc2ef3d751e4a20d918f761fd6704798'```
 

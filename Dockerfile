@@ -59,7 +59,7 @@ RUN ipython2 profile create nbserver
 #ADD ./notebooks /home/ipy/ipynotebooks
 ADD ./profile_nbserver /home/ipy/.ipython/profile_nbserver
 
-RUN openssl req -x509 -nodes -days 365 -newkey rsa:1024 -keyout /home/ipy/.ipython/profile_nbserver/mycert.pem -out /home/ipy/.ipython/profile_nbserver/mycert.pem
+ADD mycert.pem /home/ipy/.ipython/profile_nbserver/mycert.pem
 
 # generate host keys
 RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key
