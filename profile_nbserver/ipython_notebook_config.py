@@ -21,7 +21,7 @@ c = get_config()
 c.NotebookApp.enable_mathjax = True
 
 # The full path to an SSL/TLS certificate file.
-# c.NotebookApp.certfile = u''
+c.NotebookApp.certfile = u'/home/ipy/.ipython/profile_nbserver/mycert.pem'
 
 # The url for MathJax.js.
 # c.NotebookApp.mathjax_url = ''
