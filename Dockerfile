@@ -45,7 +45,7 @@ RUN rm -rf /tmp/*
 
 #user ipy
 RUN useradd -D --shell=/bin/zsh
-RUN useradd -m ipy
+RUN useradd -m -G users ipy
 
 ADD id_rsa.pub /root/.ssh/authorized_keys
 RUN chown root:root /root/.ssh/authorized_keys
@@ -60,6 +60,8 @@ RUN ipython2 profile create nbserver
 ADD ./profile_nbserver /home/ipy/.ipython/profile_nbserver
 
 ADD mycert.pem /home/ipy/.ipython/profile_nbserver/mycert.pem
+
+RUN chown -R ipy:ipy /home/ipy
 
 # generate host keys
 RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key
