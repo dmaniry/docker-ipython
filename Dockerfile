@@ -45,12 +45,10 @@ RUN rm -rf /tmp/*
 
 #user ipy
 RUN useradd -D --shell=/bin/zsh
-RUN useradd -m -G wheel ipy
+RUN useradd -m ipy
 
 ADD id_rsa.pub /root/.ssh/authorized_keys
 RUN chown root:root /root/.ssh/authorized_keys
-ADD id_rsa.pub /home/ipy/.ssh/authorized_keys
-RUN chown ipy:ipy /home/ipy/.ssh/authorized_keys
 
 ENV IPYTHONDIR /home/ipy/.ipython
 ENV IPYTHON_PROFILE nbserver
@@ -59,9 +57,6 @@ RUN ipython2 profile create nbserver
 # Adding script necessary to start ipython notebook server.
 #ADD ./notebooks /home/ipy/ipynotebooks
 ADD ./profile_nbserver /home/ipy/.ipython/profile_nbserver
-RUN chown ipy:ipy /home/ipy -R
-RUN echo "%wheel ALL=(ALL) ALL" > /etc/sudoers
-RUN visudo -s -c -f /etc/sudoers
 RUN chsh -s /bin/zsh
 
 # generate host keys
