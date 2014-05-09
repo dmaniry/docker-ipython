@@ -13,7 +13,7 @@ RUN pacman -Sy --noconfirm \
       python2-scipy python2-yaml python2-requests python2-biopython python2-jinja \
       python2-scikit-learn python2-numexpr python2-pytables python2-pyzmq \
       cython2 python2-tornado python2-pygments python2-sympy python2-nltk python2-networkx \
-      python2-matplotlib opencv eigen2 r && yes | pacman -Scc
+      python2-matplotlib python2-pillow opencv eigen2 r nodejs && yes | pacman -Scc
 
 RUN export PIP_DEFAULT_TIMEOUT=600
 #matplotlib needs latest distribute
