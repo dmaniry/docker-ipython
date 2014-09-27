@@ -34,8 +34,8 @@ RUN pip2 install rpy2
 #Optional
 #RUN pip2 install bottleneck 
 #RUN pip2 install pymc
-#RUN pip2 install patsy
-#RUN pip2 install statsmodels
+RUN pip2 install patsy
+RUN pip2 install statsmodels
 #RUN pip2 install beautifulsoup4 html5lib
 #RUN pip2 install pattern
 #RUN pip2 install vincent
