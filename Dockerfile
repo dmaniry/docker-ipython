@@ -13,14 +13,11 @@ RUN pacman -Sy --noconfirm \
       python2-scipy python2-yaml python2-requests python2-biopython python2-jinja \
       python2-scikit-learn python2-numexpr python2-pytables python2-pyzmq \
       cython2 python2-tornado python2-pygments python2-sympy python2-nltk python2-networkx \
-      python2-matplotlib python2-pillow opencv eigen2 r nodejs && yes | pacman -Scc
+      python2-matplotlib python2-pillow python2-nose python2-pandas \
+      python2-patsy python2-statsmodels opencv eigen2 r nodejs && yes | pacman -Scc
 
 RUN export PIP_DEFAULT_TIMEOUT=600
-#matplotlib needs latest distribute
-#RUN pip2 install -U distribute
 
-#Pandas
-RUN pip2 install pandas
 #Bokeh
 RUN pip2 install bokeh
 
@@ -34,8 +31,6 @@ RUN pip2 install rpy2
 #Optional
 #RUN pip2 install bottleneck 
 #RUN pip2 install pymc
-RUN pip2 install patsy
-RUN pip2 install statsmodels
 #RUN pip2 install beautifulsoup4 html5lib
 #RUN pip2 install pattern
 #RUN pip2 install vincent
