@@ -16,7 +16,7 @@ RUN pacman -Sy --noconfirm \
       python2-matplotlib python2-pillow python2-nose python2-pandas \
       python2-patsy python2-statsmodels opencv eigen2 r nodejs && yes | pacman -Scc
 
-RUN export PIP_DEFAULT_TIMEOUT=600
+ENV PIP_DEFAULT_TIMEOUT 600
 
 #Bokeh
 RUN pip2 install bokeh
@@ -56,7 +56,9 @@ ADD ./profile_nbserver /home/ipy/.ipython/profile_nbserver
 
 ADD mycert.pem /home/ipy/.ipython/profile_nbserver/mycert.pem
 
+# fix permission bs
 RUN chown -R ipy:ipy /home/ipy
+RUN cd /home/ipy/.ipython/profile_nbserver/ && rm -rf pid && rm -rf security
 
 # generate host keys
 RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key
